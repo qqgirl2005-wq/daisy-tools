@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 type Sign = {
   // 籤詩四句，每句四字，直式由右往左讀
@@ -224,6 +224,19 @@ function Stars({ count }: { count: number }) {
   );
 }
 
+function subscribeNoop() {
+  return () => {};
+}
+
+function getToday() {
+  return new Date().toLocaleDateString("zh-TW", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  });
+}
+
 function Divider() {
   return <hr className="w-full border-[#3a1a0a]/15" />;
 }
@@ -233,12 +246,8 @@ export default function FortuneDraw() {
   const [result, setResult] = useState<Result | null>(null);
   const [history, setHistory] = useState<string[]>([]);
 
-  const today = new Date().toLocaleDateString("zh-TW", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "short",
-  });
+  // 日期要在瀏覽器端讀取，建置時預先渲染不能用 new Date()
+  const today = useSyncExternalStore(subscribeNoop, getToday, () => "");
 
   function draw() {
     if (shaking) return;
